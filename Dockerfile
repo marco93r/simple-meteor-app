@@ -1,26 +1,32 @@
-# Use the official Meteor base image
-FROM geoffreybooth/meteor-base:2.7
+# Verwende das Node.js-Image als Basis, da Meteor darauf aufbaut
+FROM node:14
 
-# Set working directory
+# Setze das Arbeitsverzeichnis im Container
 WORKDIR /app
 
-# Copy the application code to the container
+# Kopiere die Anwendungsdateien in das Arbeitsverzeichnis im Container
 COPY . .
 
-# Install application dependencies
+# Installiere Meteor
+RUN curl https://install.meteor.com/ | sh
+
+# Installiere die Abhängigkeiten
 RUN meteor npm install
 
-# Build the application
-RUN meteor build --directory /app/build
+# Baue die Meteor-Anwendung
+RUN meteor build --directory /app/build --server-only
 
-# Set the working directory to the build directory
+# Setze das Arbeitsverzeichnis auf das Verzeichnis der gebauten Anwendung
 WORKDIR /app/build/bundle
 
-# Install server dependencies
+# Installiere die Abhängigkeiten der gebauten Anwendung
 RUN (cd programs/server && npm install)
 
-# Expose the port the app runs on
+# Setze die Umgebungsvariable für den Port
+ENV PORT=3000
+
+# Exponiere den Port
 EXPOSE 3000
 
-# Command to run the application
+# Startbefehl für die Anwendung
 CMD ["node", "main.js"]
